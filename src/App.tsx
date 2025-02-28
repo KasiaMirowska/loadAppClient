@@ -2,11 +2,11 @@ import Grid from "@mui/material/Grid2";
 import "./App.css";
 import { Box, Button, TextField } from "@mui/material";
 import { makeStyles } from "@mui/styles";
-import { apiCall } from "./apiCalls";
+import { apiCall } from "./components/apiCalls";
 import { useState } from "react";
 import { useDispatch } from "react-redux";
-import { saveTransaction } from "./redux/tranReducer";
-import type { AppDispatch } from "./redux/store";
+import { saveTransaction } from "./components/redux/tranReducer";
+import type { AppDispatch } from "./components/redux/store";
 
 const useStyles = makeStyles({
   app: {
@@ -50,6 +50,7 @@ function App() {
       date,
       receiptPresent
     );
+    // testDocInput();
     dispatch(
       saveTransaction({
         amount,

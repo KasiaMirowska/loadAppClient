@@ -9,7 +9,7 @@ import "@fontsource/roboto/500.css";
 import "@fontsource/roboto/700.css";
 import { ThemeProvider } from "@mui/material/styles";
 import theme from "./theme";
-import store from "./redux/store";
+import store from "./components/redux/store";
 import { Provider } from "react-redux";
 
 const rootElement = document.getElementById("root") as HTMLElement;

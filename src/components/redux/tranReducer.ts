@@ -6,6 +6,10 @@ import {
 import { v4 as uuidv4 } from "uuid";
 import type { AppThunk } from "./store";
 import { apiCall } from "../apiCalls";
+import {
+  addTransactionToDB,
+  type FirestoreTransaction,
+} from "../firebase/dbCalls";
 
 export enum TransactionSavingStatus {
   IDLE = "IDLE",
@@ -35,7 +39,7 @@ const initialState: TransactionState = {
   error: undefined,
 };
 
-interface TransactionPayload {
+export interface TransactionPayload {
   amount: string;
   description: string;
   category: string;
@@ -45,11 +49,15 @@ interface TransactionPayload {
 
 export const saveTranIntoDB = createAsyncThunk(
   "transaction/savedInDb",
-  async (transactionInfo: TransactionPayload, { rejectWithValue }) => {
+  async (transactionInfo: FirestoreTransaction, { rejectWithValue }) => {
     console.log("transactionInfo", transactionInfo);
     try {
-      const response = await apiCall();
-      return response;
+      //add to firestore
+      const firestoreRespone = await addTransactionToDB(transactionInfo);
+
+      // const response = await apiCall();
+      console.log("firestore res", firestoreRespone);
+      return firestoreRespone;
     } catch (e: any) {
       return rejectWithValue(
         e instanceof Error ? e.message : "Unknown error occurred"
@@ -65,7 +73,7 @@ export const transactionInfo = createSlice({
     transactionToState(state, action: PayloadAction<TransactionPayload>) {
       const { amount, description, category, date, receiptPresent } =
         action.payload;
-      console.log("HERERE IN REDUCER");
+
       state.id = uuidv4();
       state.amount = amount;
       state.description = description;
@@ -85,7 +93,7 @@ export const transactionInfo = createSlice({
         state.status = TransactionSavingStatus.IDLE;
       })
       .addCase(saveTranIntoDB.rejected, (state, action) => {
-        console.log("ERRPR", action.payload);
+        console.log("ERROR", action.payload);
         state.status = TransactionSavingStatus.FAILED;
         state.error = action.payload
           ? { code: "500", message: String(action.payload) }
@@ -118,6 +126,7 @@ export const saveTransaction = ({
 
     await dispatch(
       saveTranIntoDB({
+        id: updatedState.id,
         amount: updatedState.amount,
         description: updatedState.description,
         category: updatedState.category,

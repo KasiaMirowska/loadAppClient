@@ -5,11 +5,9 @@ import {
 } from "@reduxjs/toolkit";
 import { v4 as uuidv4 } from "uuid";
 import type { AppThunk } from "./store";
-import { apiCall } from "../apiCalls";
-import {
-  addTransactionToDB,
-  type FirestoreTransaction,
-} from "../firebase/dbCalls";
+import { addTransactionToDB } from "../firebase/dbCalls";
+import { s3FileUpload } from "../apiCalls";
+import _ from "lodash";
 
 export enum TransactionSavingStatus {
   IDLE = "IDLE",
@@ -26,8 +24,13 @@ interface TransactionState {
   date: string;
   receiptPresent: boolean;
   error: { code: string; message: string } | undefined;
+  type: TransactionType;
 }
 
+export enum TransactionType {
+  "manual" = "manual",
+  "receipt" = "receipt",
+}
 const initialState: TransactionState = {
   status: TransactionSavingStatus.IDLE,
   id: "",
@@ -37,7 +40,22 @@ const initialState: TransactionState = {
   date: "",
   receiptPresent: false,
   error: undefined,
+  type: TransactionType.manual,
 };
+
+export interface ManualTransaction {
+  amount: string;
+  description: string;
+  category: string;
+  date: string;
+  receiptPresent: boolean;
+  type: TransactionType.manual;
+}
+
+export interface ReceiptTransaction {
+  receiptPresent: boolean;
+  type: TransactionType.receipt;
+}
 
 export interface TransactionPayload {
   amount: string;
@@ -45,18 +63,39 @@ export interface TransactionPayload {
   category: string;
   date: string;
   receiptPresent: boolean;
+  type: TransactionType;
+}
+
+export interface FirestoreManualTransaction extends ManualTransaction {
+  id: string;
+}
+
+export interface FirestoreReceiptTransaction extends ReceiptTransaction {
+  id: string;
+}
+
+export function isReceiptTransactionPayload(
+  tran: ManualTransaction | ReceiptTransaction
+): tran is ReceiptTransaction {
+  return tran.type == TransactionType.receipt;
+}
+
+export function isReceiptFirestoreTransaction(
+  tran: FirestoreManualTransaction | FirestoreReceiptTransaction
+): tran is FirestoreReceiptTransaction {
+  return tran.type == TransactionType.receipt && !_.isUndefined(tran.id);
 }
 
 export const saveTranIntoDB = createAsyncThunk(
-  "transaction/savedInDb",
-  async (transactionInfo: FirestoreTransaction, { rejectWithValue }) => {
+  "manualTransaction/savedInDb",
+  async (
+    transactionInfo: FirestoreManualTransaction | FirestoreReceiptTransaction,
+    { rejectWithValue }
+  ) => {
     console.log("transactionInfo", transactionInfo);
     try {
       //add to firestore
       const firestoreRespone = await addTransactionToDB(transactionInfo);
-
-      // const response = await apiCall();
-      console.log("firestore res", firestoreRespone);
       return firestoreRespone;
     } catch (e: any) {
       return rejectWithValue(
@@ -66,11 +105,27 @@ export const saveTranIntoDB = createAsyncThunk(
   }
 );
 
+export const uploadFile = createAsyncThunk(
+  "upload receipts per transaction",
+  async (file: any, { rejectWithValue }) => {
+    console.log("file", file);
+
+    try {
+      const response = await s3FileUpload(file);
+      console.log("aws res", response);
+      return response;
+    } catch (e: any) {
+      return rejectWithValue(
+        e instanceof Error ? e.message : "Unknown error occurred"
+      );
+    }
+  }
+);
 export const transactionInfo = createSlice({
   name: "transaction",
   initialState,
   reducers: {
-    transactionToState(state, action: PayloadAction<TransactionPayload>) {
+    manualTranToState(state, action: PayloadAction<ManualTransaction>) {
       const { amount, description, category, date, receiptPresent } =
         action.payload;
 
@@ -81,6 +136,10 @@ export const transactionInfo = createSlice({
       state.date = date;
       state.receiptPresent = receiptPresent;
     },
+    receiptTranToState(state, action: PayloadAction<ReceiptTransaction>) {
+      state.receiptPresent = true;
+      state.id = uuidv4();
+    },
   },
 
   extraReducers: (builder) => {
@@ -89,7 +148,7 @@ export const transactionInfo = createSlice({
         state.status = TransactionSavingStatus.LOADING;
       })
       .addCase(saveTranIntoDB.fulfilled, (state, action) => {
-        console.log("AAA", action.payload);
+        console.log("AAA", action.payload.success);
         state.status = TransactionSavingStatus.IDLE;
       })
       .addCase(saveTranIntoDB.rejected, (state, action) => {
@@ -102,37 +161,50 @@ export const transactionInfo = createSlice({
   },
 });
 
-export const { transactionToState } = transactionInfo.actions;
+export const { manualTranToState, receiptTranToState } =
+  transactionInfo.actions;
 export default transactionInfo.reducer;
 
-export const saveTransaction = ({
-  amount,
-  description,
-  category,
-  date,
-  receiptPresent,
-}: TransactionPayload): AppThunk => {
+export const saveTransaction = (
+  transaction: ReceiptTransaction | ManualTransaction
+): AppThunk => {
   return async (dispatch, getState) => {
-    await dispatch(
-      transactionToState({
-        amount,
-        description,
-        category,
-        date,
-        receiptPresent,
-      })
-    );
-    const updatedState = getState().transaction;
+    if (!isReceiptTransactionPayload(transaction)) {
+      const { amount, description, category, date, receiptPresent, type } =
+        transaction;
+      await dispatch(
+        manualTranToState({
+          amount,
+          description,
+          category,
+          date,
+          receiptPresent,
+          type,
+        })
+      );
+      const updatedState = getState().transaction;
 
-    await dispatch(
-      saveTranIntoDB({
-        id: updatedState.id,
-        amount: updatedState.amount,
-        description: updatedState.description,
-        category: updatedState.category,
-        date: updatedState.date,
-        receiptPresent: updatedState.receiptPresent,
-      })
-    );
+      await dispatch(
+        saveTranIntoDB({
+          id: updatedState.id,
+          amount: updatedState.amount,
+          description: updatedState.description,
+          category: updatedState.category,
+          date: updatedState.date,
+          receiptPresent: updatedState.receiptPresent,
+          type: TransactionType.manual,
+        })
+      );
+    } else {
+      await dispatch(receiptTranToState(transaction));
+      const updatedState = getState().transaction;
+      await dispatch(
+        saveTranIntoDB({
+          id: updatedState.id,
+          type: TransactionType.receipt,
+          receiptPresent: updatedState.receiptPresent,
+        })
+      );
+    }
   };
 };

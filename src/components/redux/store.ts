@@ -1,4 +1,4 @@
-import { configureStore, Action, ThunkAction } from "@reduxjs/toolkit";
+import { configureStore, ThunkAction } from "@reduxjs/toolkit";
 import tranReducer from "./tranReducer";
 
 const store = configureStore({

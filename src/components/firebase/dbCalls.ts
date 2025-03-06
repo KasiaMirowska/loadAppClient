@@ -1,18 +1,34 @@
-import { doc, getFirestore, setDoc } from "firebase/firestore";
+import {
+  doc,
+  getFirestore,
+  setDoc,
+  type DocumentReference,
+} from "firebase/firestore";
 import { app } from "./setup";
-import type { TransactionPayload } from "../redux/tranReducer";
+import {
+  isReceiptFirestoreTransaction,
+  type FirestoreManualTransaction,
+  type FirestoreReceiptTransaction,
+} from "../redux/tranReducer";
 
 const db = getFirestore(app);
 
-export interface FirestoreTransaction extends TransactionPayload {
-  id: string;
-}
+export const addTransactionToDB = async (
+  docToSave: FirestoreManualTransaction | FirestoreReceiptTransaction
+) => {
+  if (!docToSave || !("id" in docToSave)) {
+    throw new Error("Invalid document: Missing required ID");
+  }
 
-export const addTransactionToDB = async (docToSave: FirestoreTransaction) => {
+  let fileRef: DocumentReference; // Explicitly define fileRef's type
+
+  if (isReceiptFirestoreTransaction(docToSave)) {
+    fileRef = doc(db, "receiptTransactions", docToSave.id);
+  } else {
+    fileRef = doc(db, "manualTransactions", docToSave.id);
+  }
+
   try {
-    console.log("hello from firestore");
-    // throw new Error("Test error from firestore");
-    const fileRef = doc(db, "transactions", docToSave.id);
     await setDoc(fileRef, docToSave);
     return { success: true, id: docToSave.id };
   } catch (e) {

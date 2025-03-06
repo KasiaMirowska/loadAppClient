@@ -5,8 +5,12 @@ import { makeStyles } from "@mui/styles";
 import { apiCall } from "./components/apiCalls";
 import { useState } from "react";
 import { useDispatch } from "react-redux";
-import { saveTransaction } from "./components/redux/tranReducer";
+import {
+  saveTransaction,
+  TransactionType,
+} from "./components/redux/tranReducer";
 import type { AppDispatch } from "./components/redux/store";
+import UploadComponent from "./components/FileUploader";
 
 const useStyles = makeStyles({
   app: {
@@ -58,8 +62,13 @@ function App() {
         category,
         date,
         receiptPresent,
+        type: TransactionType.manual,
       })
     );
+    setAmount("0.00");
+    setDescription("");
+    setCategory("");
+    setDate("");
   };
   return (
     <Grid
@@ -115,6 +124,8 @@ function App() {
         <Button variant="contained" onClick={() => apiCall()}>
           Make API Call
         </Button>
+
+        <UploadComponent />
       </Grid>
     </Grid>
   );

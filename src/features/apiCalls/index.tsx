@@ -12,12 +12,13 @@ export const apiCall = async () => {
 export const s3FileUpload = async (file: any) => {
   if (!file) return;
   //generate access url to s3 bucket
+  console.log("HERER IN BEFORE THE UPLOAD");
   const response = await fetch(
     `http://localhost:8080/generate-presigned-url?fileName=${file.name}&fileType=${file.type}`
   );
 
   const data = await response.json();
-
+  console.log("HERER IN AFTER THE UPLOAD", data);
   const { url } = data;
   const uploadResponse = await fetch(url, {
     method: "PUT",

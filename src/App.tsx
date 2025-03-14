@@ -1,133 +1,81 @@
-import Grid from "@mui/material/Grid2";
 import "./App.css";
-import { Box, Button, TextField } from "@mui/material";
-import { makeStyles } from "@mui/styles";
-import { apiCall } from "./components/apiCalls";
-import { useState } from "react";
-import { useDispatch } from "react-redux";
+import { Route, Routes } from "react-router-dom";
+import { Home } from "./components/Home";
+import { ManualEntry } from "./components/ManualEntry";
+import UploadReceipt from "./components/UploadReceipt";
+import { BankSync } from "./components/BankSync";
+import { Navbar } from "./components/Navbar";
+import Grid from "@mui/material/Grid2";
 import {
-  saveTransaction,
-  TransactionType,
-} from "./components/redux/tranReducer";
-import type { AppDispatch } from "./components/redux/store";
-import UploadComponent from "./components/FileUploader";
+  AppBar,
+  Box,
+  createTheme,
+  IconButton,
+  Toolbar,
+  Typography,
+} from "@mui/material";
+import { makeStyles } from "@mui/styles";
 
+const theme = createTheme({
+  palette: {
+    primary: {
+      main: "#789696",
+    },
+  },
+});
 const useStyles = makeStyles({
   app: {
-    minHeight: "100vh",
-    backgroundColor: "#FAFFFF",
-    minWidth: "100vh",
+    height: "100vh", // Ensures full viewport height
+    width: "100vw",
+    backgroundColor: "#cadbdb",
+    flexDirection: "column",
   },
   appHeader: {
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
     justifyContent: "center",
-    fontSize: "calc(10px + 2vmin)",
-    color: "#008000",
+    minWidth: "100vw",
   },
-  // { #008040, #408000 }
+  paper: {
+    padding: "1em",
+  },
+
+  // { #008040, #408000 , #789696}
   // { #FF8380, #A700B0, #800400, #804000}
-  formBox: {
-    backgroundColor: "#FFFFFF",
-    outline: "1px solid #408000",
-    maxWidth: "90vh",
-    padding: "2em",
-  },
 });
 
 function App() {
   const classes: any = useStyles();
-  const dispatch = useDispatch<AppDispatch>();
-  let [amount, setAmount] = useState("0.00");
-  let [description, setDescription] = useState("");
-  let [category, setCategory] = useState("");
-  let [date, setDate] = useState("");
-  let [receiptPresent, setReceiptPresent] = useState(false);
-
-  const onSubmitTranInfo = () => {
-    console.log(
-      "about to click",
-      amount,
-      description,
-      category,
-      date,
-      receiptPresent
-    );
-    // testDocInput();
-    dispatch(
-      saveTransaction({
-        amount,
-        description,
-        category,
-        date,
-        receiptPresent,
-        type: TransactionType.manual,
-      })
-    );
-    setAmount("0.00");
-    setDescription("");
-    setCategory("");
-    setDate("");
-  };
   return (
-    <Grid
-      container
-      flexDirection="column"
-      justifyContent="flex-start"
-      alignItems="center"
-      className={classes.app}
-    >
-      <Grid container flexDirection="column">
-        <header className={classes.appHeader}>FILE LOADER</header>
+    <Box className={classes.app}>
+      {/* <Box sx={{ flexGrow: 1 }}> */}
+      <AppBar
+        position="static"
+        sx={{ backgroundColor: "#008000" }}
+        className={classes.appHeader}
+      >
+        <Toolbar>
+          <Typography variant="h4" sx={{ flexGrow: 1, fontStyle: "bold" }}>
+            COST TRACKER
+          </Typography>
+        </Toolbar>
+        <Navbar />
+      </AppBar>
+      <Grid
+        container
+        flexDirection="column"
+        justifyContent="flex-start"
+        alignItems="center"
+      >
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/manualEntry" element={<ManualEntry />} />
+          <Route path="/uploadReceipt" element={<UploadReceipt />} />
+          <Route path="/syncBankTransactions" element={<BankSync />} />
+        </Routes>
       </Grid>
-      <Grid container flexDirection="column">
-        <Box component="form" className={classes.formBox}>
-          <TextField
-            id="outlined-controlled"
-            label="Amount"
-            value={amount}
-            onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-              setAmount(event.target.value);
-            }}
-          />
-          <TextField
-            id="outlined-controlled"
-            label="Category"
-            value={category}
-            onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-              setCategory(event.target.value);
-            }}
-          />
-          <TextField
-            id="outlined-controlled"
-            label="Description"
-            value={description}
-            onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-              setDescription(event.target.value);
-            }}
-          />
-          <TextField
-            id="outlined-controlled"
-            label="Date"
-            value={date}
-            onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-              setDate(event.target.value);
-            }}
-          />
-        </Box>
-      </Grid>
-      <Grid>
-        <Button variant="contained" onClick={() => onSubmitTranInfo()}>
-          Submit transaction
-        </Button>
-        <Button variant="contained" onClick={() => apiCall()}>
-          Make API Call
-        </Button>
-
-        <UploadComponent />
-      </Grid>
-    </Grid>
+    </Box>
   );
 }
 

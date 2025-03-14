@@ -2,14 +2,11 @@ import { useState } from "react";
 import { Grid } from "@mui/system";
 import { Button } from "@mui/material";
 import { useDispatch } from "react-redux";
-import {
-  saveTransaction,
-  TransactionType,
-  uploadFile,
-} from "../redux/tranReducer";
-import type { AppDispatch } from "../redux/store";
+import { saveTransaction, uploadFile } from "../../features/redux/tranReducer";
+import type { AppDispatch } from "../../features/redux/store";
+import { TransactionType } from "../../features/redux/types";
 
-export default function UploadComponent() {
+export default function UploadReceipt() {
   const dispatch = useDispatch<AppDispatch>();
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);

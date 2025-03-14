@@ -5,11 +5,12 @@ import {
   type DocumentReference,
 } from "firebase/firestore";
 import { app } from "./setup";
+import {} from "../redux/tranReducer";
 import {
   isReceiptFirestoreTransaction,
   type FirestoreManualTransaction,
   type FirestoreReceiptTransaction,
-} from "../redux/tranReducer";
+} from "../redux/types";
 
 const db = getFirestore(app);
 

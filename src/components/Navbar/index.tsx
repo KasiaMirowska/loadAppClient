@@ -6,6 +6,9 @@ import WhatshotIcon from "@mui/icons-material/Whatshot";
 import GrainIcon from "@mui/icons-material/Grain";
 import { makeStyles } from "@mui/styles";
 import { Link } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { activeServerInfo } from "../../features/redux/servReducer";
+import { ServerType } from "../../features/redux/types";
 
 const useStyles = makeStyles({
   nav: {
@@ -40,6 +43,7 @@ const useStyles = makeStyles({
 
 export const Navbar: React.FC = () => {
   const classes = useStyles();
+  const dispatch = useDispatch();
 
   return (
     <Grid justifyContent="center" className={classes.nav}>
@@ -48,7 +52,11 @@ export const Navbar: React.FC = () => {
         separator="/"
         classes={{ separator: classes.separator }}
       >
-        <Link to="/" className={classes.link}>
+        <Link
+          to="/"
+          className={classes.link}
+          onClick={() => dispatch(activeServerInfo(ServerType.nonePicked))}
+        >
           <HomeIcon className={classes.icon} />
           Home
         </Link>

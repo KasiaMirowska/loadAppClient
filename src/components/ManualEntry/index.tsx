@@ -6,7 +6,6 @@ import { useDispatch } from "react-redux";
 import type { AppDispatch } from "../../features/redux/store";
 import { saveTransaction } from "../../features/redux/tranReducer";
 import { TransactionType } from "../../features/redux/types";
-import { apiCall } from "../../features/apiCalls";
 
 const useStyles = makeStyles(() => ({
   formBox: {
@@ -82,9 +81,6 @@ export const ManualEntry: React.FC = () => {
       <Grid>
         <Button variant="contained" onClick={() => onSubmitTranInfo()}>
           Submit transaction
-        </Button>
-        <Button variant="contained" onClick={() => apiCall()}>
-          Make API Call
         </Button>
       </Grid>
     </Grid>

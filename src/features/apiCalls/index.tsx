@@ -1,49 +1,35 @@
-export const apiCall = async () => {
-  const response = await fetch("http://localhost:8080");
-  if (response.ok) {
-    return response.json();
-  } else {
-    const errorData = await response.json();
-    console.log("eee jere", errorData);
-    throw new Error(errorData.error || "Unknown API error");
-  }
-};
-
-export const s3FileUpload = async (file: any) => {
+export const s3FileUpload = async (file: File, receiptId: string) => {
   if (!file) return;
-  //generate access url to s3 bucket
-  console.log("HERER IN BEFORE THE UPLOAD");
+
+  // 1. Get presigned upload URL from your deployed API Gateway
+  const apiBase = "https://1wqyztt31g.execute-api.us-east-1.amazonaws.com"; // <-- Replace with your actual one
   const response = await fetch(
-    `http://localhost:8080/generate-presigned-url?fileName=${file.name}&fileType=${file.type}`
+    `${apiBase}/generate-presigned-url?fileName=${encodeURIComponent(
+      file.name
+    )}&fileType=${file.type}&receiptId=${receiptId}`
   );
 
-  const data = await response.json();
-  console.log("HERER IN AFTER THE UPLOAD", data);
-  const { url } = data;
+  if (!response.ok) throw new Error("Failed to get presigned URL");
+  const { url, key } = await response.json(); // `key` is the S3 key (optional if returned)
+
+  // 2. Upload file to S3 using the presigned URL
   const uploadResponse = await fetch(url, {
     method: "PUT",
     headers: {
       "Content-Type": file.type,
-      // "Access-Control-Allow-Origin": "*",
     },
     body: file,
   });
 
   if (uploadResponse.ok) {
-    return { success: true };
+    return { success: true, key };
   } else {
-    const textResponse = await uploadResponse.text();
-    console.log("Raw response text:", textResponse);
-
-    // Try to parse the response as JSON, if possible
+    const errorText = await uploadResponse.text();
     try {
-      const errorData = JSON.parse(textResponse);
-      console.log("Parsed error data:", errorData);
-      throw new Error(errorData.error || "Error during upload");
-    } catch (e) {
-      // If it's not valid JSON, it's likely an XML error page
-      console.log("Error response is not JSON, raw response:", textResponse);
-      throw new Error("Error during upload (non-JSON response)");
+      const jsonError = JSON.parse(errorText);
+      throw new Error(jsonError.error || "Upload failed");
+    } catch {
+      throw new Error("Upload failed (non-JSON response): " + errorText);
     }
   }
 };

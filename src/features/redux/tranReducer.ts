@@ -29,6 +29,7 @@ const initialState: TransactionState = {
   receiptPresent: false,
   error: undefined,
   type: TransactionType.manual,
+  uploadedFileName: undefined,
 };
 
 export const saveTranIntoDB = createAsyncThunk(
@@ -50,15 +51,17 @@ export const saveTranIntoDB = createAsyncThunk(
   }
 );
 
-export const uploadFile = createAsyncThunk(
+export const uploadReceiptImages = createAsyncThunk(
   "upload receipts per transaction",
-  async (file: any, { rejectWithValue }) => {
-    console.log("file", file);
-
+  async (
+    { files, receiptId }: { files: File[]; receiptId: string },
+    { rejectWithValue }
+  ) => {
     try {
-      const response = await s3FileUpload(file);
-      console.log("aws res", response);
-      return response;
+      const uploads = await Promise.all(
+        files.map((file) => s3FileUpload(file, receiptId))
+      );
+      return { receiptId, uploads };
     } catch (e: any) {
       return rejectWithValue(
         e instanceof Error ? e.message : "Unknown error occurred"
@@ -84,6 +87,7 @@ export const transactionInfo = createSlice({
     receiptTranToState(state, action: PayloadAction<ReceiptTransaction>) {
       state.receiptPresent = true;
       state.id = uuidv4();
+      state.uploadedFileName = action.payload.uploadedFileName;
     },
   },
 
@@ -141,13 +145,19 @@ export const saveTransaction = (
         })
       );
     } else {
-      await dispatch(receiptTranToState(transaction));
+      await dispatch(receiptTranToState(transaction)); //we should save in db AFTER processing data from the receipt in the lambda...
+      // temporary solution adding unnesesary property  of the file name to transaction and not including all the data that will available after decoding the doc
       const updatedState = getState().transaction;
+      if (!updatedState.uploadedFileName) {
+        return;
+      }
+
       await dispatch(
         saveTranIntoDB({
           id: updatedState.id,
           type: TransactionType.receipt,
           receiptPresent: updatedState.receiptPresent,
+          uploadedFileName: updatedState.uploadedFileName,
         })
       );
     }

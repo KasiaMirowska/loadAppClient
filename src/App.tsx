@@ -1,4 +1,3 @@
-import "./App.css";
 import { Route, Routes } from "react-router-dom";
 import { Home } from "./components/Home";
 import { ManualEntry } from "./components/ManualEntry";
@@ -25,7 +24,7 @@ const theme = createTheme({
 });
 const useStyles = makeStyles({
   app: {
-    height: "100vh", // Ensures full viewport height
+    height: "100vh",
     width: "100vw",
     backgroundColor: "#cadbdb",
     flexDirection: "column",
@@ -40,7 +39,7 @@ const useStyles = makeStyles({
   paper: {
     padding: "1em",
   },
-
+  // color options:
   // { #008040, #408000 , #789696}
   // { #FF8380, #A700B0, #800400, #804000}
 });
@@ -49,7 +48,6 @@ function App() {
   const classes: any = useStyles();
   return (
     <Box className={classes.app}>
-      {/* <Box sx={{ flexGrow: 1 }}> */}
       <AppBar
         position="static"
         sx={{ backgroundColor: "#008000" }}
@@ -71,7 +69,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/manualEntry" element={<ManualEntry />} />
-          <Route path="/uploadReceipt" element={<UploadReceipt />} />
+          <Route path="/uploadReceipts" element={<UploadReceipt />} />
           <Route path="/syncBankTransactions" element={<BankSync />} />
         </Routes>
       </Grid>

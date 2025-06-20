@@ -16,6 +16,7 @@ export interface TransactionState {
   receiptPresent: boolean;
   error: { code: string; message: string } | undefined;
   type: TransactionType;
+  uploadedFileName: string | undefined;
 }
 
 export enum TransactionType {
@@ -35,6 +36,7 @@ export interface ManualTransaction {
 export interface ReceiptTransaction {
   receiptPresent: boolean;
   type: TransactionType.receipt;
+  uploadedFileName: string;
 }
 
 export interface TransactionPayload {
@@ -52,16 +54,34 @@ export interface FirestoreManualTransaction extends ManualTransaction {
 
 export interface FirestoreReceiptTransaction extends ReceiptTransaction {
   id: string;
+  uploadedFileName: string;
 }
 
 export function isReceiptTransactionPayload(
   tran: ManualTransaction | ReceiptTransaction
 ): tran is ReceiptTransaction {
-  return tran.type == TransactionType.receipt;
+  return (
+    tran.type == TransactionType.receipt &&
+    !_.isUndefined(tran.uploadedFileName)
+  );
 }
 
 export function isReceiptFirestoreTransaction(
   tran: FirestoreManualTransaction | FirestoreReceiptTransaction
 ): tran is FirestoreReceiptTransaction {
-  return tran.type == TransactionType.receipt && !_.isUndefined(tran.id);
+  return (
+    tran.type == TransactionType.receipt &&
+    !_.isUndefined(tran.id) &&
+    !_.isUndefined(tran.uploadedFileName)
+  );
+}
+
+export enum ServerType {
+  express = "EXPRESS",
+  serverlessAWS = "SERVERLESS_AWS",
+  nonePicked = "NONE",
+}
+
+export interface ServerState {
+  activeServer: ServerType;
 }

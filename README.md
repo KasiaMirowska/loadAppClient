@@ -20,7 +20,7 @@ This is a full-stack app for uploading receipt images, processing them via OCR a
 ---
 
 ## 📦 Tech Stack:
-
+```bash
 • Frontend: React + Redux Toolkit + MUI + Styled Components
 • State management: Redux (Transaction slice, Upload thunk)
 • Backend: AWS Lambda (Node.js + TypeScript)
@@ -28,11 +28,18 @@ This is a full-stack app for uploading receipt images, processing them via OCR a
 • Database: Google Firestore (via service account key)
 • OCR: Amazon Textract
 • LLM Parsing: Claude 3 via AWS Bedrock
+```
 ---
 
-## Deployment: Serverless Framework (sls deploy) for Lambdas, aws s3 sync for frontend
+## Deployment: 
+```bash 
+Serverless Framework (sls deploy) for Lambdas, aws s3 sync for frontend
+```
+
 ##SETUP
+```bash
 cd load-app-client
 npm install
 npm run build
+```
 

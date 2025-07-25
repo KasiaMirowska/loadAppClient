@@ -17,22 +17,20 @@ This is a full-stack app for uploading receipt images, processing them via OCR a
 ├── receiptProcessor/         # Lambda function to parse receipts and write to Firestore
 └── generate-url-service/     # Lambda for issuing presigned S3 URLs
 ```
-##Tech Stack
-Frontend: React + Redux Toolkit + MUI + Styled Components
+---
 
-State management: Redux (Transaction slice, Upload thunk)
+## 📦 Tech Stack:
 
-Backend: AWS Lambda (Node.js + TypeScript)
+• Frontend: React + Redux Toolkit + MUI + Styled Components
+• State management: Redux (Transaction slice, Upload thunk)
+• Backend: AWS Lambda (Node.js + TypeScript)
+• Storage: Amazon S3 for raw files
+• Database: Google Firestore (via service account key)
+• OCR: Amazon Textract
+• LLM Parsing: Claude 3 via AWS Bedrock
+---
 
-Storage: Amazon S3 for raw files
-
-Database: Google Firestore (via service account key)
-
-OCR: Amazon Textract
-
-LLM Parsing: Claude 3 via AWS Bedrock
-
-Deployment: Serverless Framework (sls deploy) for Lambdas, aws s3 sync for frontend
+## Deployment: Serverless Framework (sls deploy) for Lambdas, aws s3 sync for frontend
 ##SETUP
 cd load-app-client
 npm install

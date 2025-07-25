@@ -1,13 +1,10 @@
-import { createSelector } from "@reduxjs/toolkit";
 import { RootState } from "./store";
-import { ServerType } from "./types";
 
-export const selectActiveState = (state: RootState): ServerType =>
-  state.server.activeServer;
+export const selectReceiptUpload = (state: RootState): boolean => {
+  return state.transaction.uploadedFileNames.length > 0;
+};
 
-export const selectIsServerless = (state: RootState): boolean =>
-  state.server.activeServer === ServerType.serverlessAWS;
-export const selectIsExpress = (state: RootState): boolean =>
-  state.server.activeServer === ServerType.express;
-export const selectIsNone = (state: RootState): boolean =>
-  state.server.activeServer === ServerType.nonePicked;
+export const selectReceiptParsed = (state: RootState) =>
+  state.transaction.receiptParsed;
+
+export const selectReceiptDataFromDB = (state: RootState) => state.transaction;

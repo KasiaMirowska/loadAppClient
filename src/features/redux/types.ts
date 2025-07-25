@@ -9,14 +9,18 @@ export enum TransactionSavingStatus {
 export interface TransactionState {
   status: TransactionSavingStatus;
   id: string;
-  amount: string;
+  total: number;
+  tax: number;
+  merchant: string;
   description: string;
   category: string;
   date: string;
   receiptPresent: boolean;
   error: { code: string; message: string } | undefined;
   type: TransactionType;
-  uploadedFileName: string | undefined;
+  uploadedFileNames: string[];
+  receiptParsed: boolean;
+  items: TranItem[];
 }
 
 export enum TransactionType {
@@ -25,22 +29,32 @@ export enum TransactionType {
 }
 
 export interface ManualTransaction {
-  amount: string;
+  total: number;
   description: string;
   category: string;
   date: string;
   receiptPresent: boolean;
-  type: TransactionType.manual;
+  type: TransactionType;
 }
 
-export interface ReceiptTransaction {
+export interface TranItem {
+  name: string;
+  quantity: number;
+  price: number;
+}
+
+export interface ReceiptTransaction extends ManualTransaction {
+  total: number;
+  items: TranItem[];
+  merchant: string;
+  tax: number;
   receiptPresent: boolean;
-  type: TransactionType.receipt;
-  uploadedFileName: string;
+  type: TransactionType;
+  uploadedFileNames: string[];
 }
 
 export interface TransactionPayload {
-  amount: string;
+  amount: number;
   description: string;
   category: string;
   date: string;
@@ -54,26 +68,13 @@ export interface FirestoreManualTransaction extends ManualTransaction {
 
 export interface FirestoreReceiptTransaction extends ReceiptTransaction {
   id: string;
-  uploadedFileName: string;
-}
-
-export function isReceiptTransactionPayload(
-  tran: ManualTransaction | ReceiptTransaction
-): tran is ReceiptTransaction {
-  return (
-    tran.type == TransactionType.receipt &&
-    !_.isUndefined(tran.uploadedFileName)
-  );
+  uploadedFileNames: string[];
 }
 
 export function isReceiptFirestoreTransaction(
   tran: FirestoreManualTransaction | FirestoreReceiptTransaction
 ): tran is FirestoreReceiptTransaction {
-  return (
-    tran.type == TransactionType.receipt &&
-    !_.isUndefined(tran.id) &&
-    !_.isUndefined(tran.uploadedFileName)
-  );
+  return tran.type == TransactionType.receipt && !_.isUndefined(tran.id);
 }
 
 export enum ServerType {

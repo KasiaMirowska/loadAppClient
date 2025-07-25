@@ -4,76 +4,62 @@ import { ManualEntry } from "./components/ManualEntry";
 import UploadReceipt from "./components/UploadReceipt";
 import { BankSync } from "./components/BankSync";
 import { Navbar } from "./components/Navbar";
-import Grid from "@mui/material/Grid2";
-import {
-  AppBar,
-  Box,
-  createTheme,
-  IconButton,
-  Toolbar,
-  Typography,
-} from "@mui/material";
-import { makeStyles } from "@mui/styles";
 
-const theme = createTheme({
-  palette: {
-    primary: {
-      main: "#789696",
-    },
+import { Box, Typography, ThemeProvider } from "@mui/material";
+import { styled } from "@mui/material/styles";
+
+const AppContainer = styled(Box)(({ theme }) => ({
+  minHeight: "100vh",
+  width: "100vw",
+  backgroundColor: "#f0f6eb",
+  display: "flex",
+  flexDirection: "column",
+}));
+
+const HeaderContainer = styled(Box)(({ theme }) => ({
+  backgroundColor: "#789696",
+  display: "flex",
+  justifyContent: "space-between",
+  alignItems: "center",
+  length: "100vw",
+  padding: theme.spacing(4, 4, 0, 4),
+  [theme.breakpoints.down("sm")]: {
+    padding: theme.spacing(4),
   },
-});
-const useStyles = makeStyles({
-  app: {
-    height: "100vh",
-    width: "100vw",
-    backgroundColor: "#cadbdb",
-    flexDirection: "column",
-  },
-  appHeader: {
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    justifyContent: "center",
-    minWidth: "100vw",
-  },
-  paper: {
-    padding: "1em",
-  },
-  // color options:
-  // { #008040, #408000 , #789696}
-  // { #FF8380, #A700B0, #800400, #804000}
-});
+}));
+
+const AppTitle = styled(Typography)(({ theme }) => ({
+  color: "#fff",
+  fontWeight: "bold",
+  fontSize: "2.5rem",
+}));
 
 function App() {
-  const classes: any = useStyles();
   return (
-    <Box className={classes.app}>
-      <AppBar
-        position="static"
-        sx={{ backgroundColor: "#008000" }}
-        className={classes.appHeader}
-      >
-        <Toolbar>
-          <Typography variant="h4" sx={{ flexGrow: 1, fontStyle: "bold" }}>
-            COST TRACKER
-          </Typography>
-        </Toolbar>
-        <Navbar />
-      </AppBar>
-      <Grid
-        container
-        flexDirection="column"
-        justifyContent="flex-start"
-        alignItems="center"
-      >
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/manualEntry" element={<ManualEntry />} />
-          <Route path="/uploadReceipts" element={<UploadReceipt />} />
-          <Route path="/syncBankTransactions" element={<BankSync />} />
-        </Routes>
-      </Grid>
-    </Box>
+    <AppContainer>
+      <HeaderContainer>
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            width: "100%",
+            flexWrap: "wrap",
+            gap: 2,
+          }}
+        >
+          <AppTitle>COST TRACKER</AppTitle>
+          <Navbar />
+        </Box>
+      </HeaderContainer>
+
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/manualEntry" element={<ManualEntry />} />
+        <Route path="/uploadReceipts" element={<UploadReceipt />} />
+        <Route path="/syncBankTransactions" element={<BankSync />} />
+      </Routes>
+    </AppContainer>
   );
 }
 

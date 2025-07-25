@@ -3,22 +3,26 @@ import ReactDOM from "react-dom/client";
 import "./index.css";
 import App from "./App";
 import reportWebVitals from "./reportWebVitals";
-import "@fontsource/roboto/300.css";
-import "@fontsource/roboto/400.css";
-import "@fontsource/roboto/500.css";
-import "@fontsource/roboto/700.css";
 import { ThemeProvider } from "@mui/material/styles";
-import theme from "./theme";
+
 import store from "./features/redux/store";
 import { Provider } from "react-redux";
 import { BrowserRouter } from "react-router";
+import { CssBaseline } from "@mui/material";
+import theme from "./theme/index";
 
 const rootElement = document.getElementById("root") as HTMLElement;
 const root = ReactDOM.createRoot(rootElement);
+console.log(
+  "Loaded theme background.default:",
+  theme.palette.background.default
+);
+
 root.render(
   <BrowserRouter>
     <Provider store={store}>
       <ThemeProvider theme={theme}>
+        <CssBaseline />
         <React.StrictMode>
           <App />
         </React.StrictMode>

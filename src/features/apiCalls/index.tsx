@@ -1,18 +1,25 @@
-export const s3FileUpload = async (file: File, receiptId: string) => {
+export const s3FileUpload = async (file: File, customKey: string) => {
   if (!file) return;
 
-  // 1. Get presigned upload URL from your deployed API Gateway
-  const apiBase = "https://1wqyztt31g.execute-api.us-east-1.amazonaws.com"; // <-- Replace with your actual one
+  if (!customKey || !customKey.includes("/")) {
+    throw new Error(
+      "customKey must include folder/structure like receiptId/image_0.jpg"
+    );
+  }
+
+  const apiBase = "https://stej0scudl.execute-api.us-east-1.amazonaws.com"; // Your API Gateway
+  const encodedKey = encodeURIComponent(customKey);
+
   const response = await fetch(
-    `${apiBase}/generate-presigned-url?fileName=${encodeURIComponent(
-      file.name
-    )}&fileType=${file.type}&receiptId=${receiptId}`
+    `${apiBase}/generate-presigned-url?fileName=${encodedKey}&fileType=${file.type}`
   );
 
-  if (!response.ok) throw new Error("Failed to get presigned URL");
-  const { url, key } = await response.json(); // `key` is the S3 key (optional if returned)
+  if (!response.ok) {
+    throw new Error("Failed to get presigned URL");
+  }
 
-  // 2. Upload file to S3 using the presigned URL
+  const { url, key }: { url: string; key: string } = await response.json(); // key should match `customKey`
+
   const uploadResponse = await fetch(url, {
     method: "PUT",
     headers: {
@@ -21,9 +28,7 @@ export const s3FileUpload = async (file: File, receiptId: string) => {
     body: file,
   });
 
-  if (uploadResponse.ok) {
-    return { success: true, key };
-  } else {
+  if (!uploadResponse.ok) {
     const errorText = await uploadResponse.text();
     try {
       const jsonError = JSON.parse(errorText);
@@ -32,4 +37,9 @@ export const s3FileUpload = async (file: File, receiptId: string) => {
       throw new Error("Upload failed (non-JSON response): " + errorText);
     }
   }
+
+  return {
+    success: true,
+    key,
+  };
 };

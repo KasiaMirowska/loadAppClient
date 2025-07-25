@@ -1,22 +1,25 @@
 import { useState } from "react";
 import Grid from "@mui/material/Grid2";
-import { Box, Button, TextField } from "@mui/material";
-import { makeStyles } from "@mui/styles";
+import {
+  Box,
+  Button,
+  Card,
+  styled,
+  TextField,
+  Typography,
+} from "@mui/material";
 import { useDispatch } from "react-redux";
 import type { AppDispatch } from "../../features/redux/store";
-import { saveTransaction } from "../../features/redux/tranReducer";
+// import { saveTransaction } from "../../features/redux/tranReducer";
 import { TransactionType } from "../../features/redux/types";
+import { FormCard, MainContainer, Header } from "../../theme/containers";
 
-const useStyles = makeStyles(() => ({
-  formBox: {
-    backgroundColor: "#FFFFFF",
-    outline: "1px solid #408000",
-    maxWidth: "90vh",
-    padding: "2em",
-  },
+const InputBox = styled(TextField)(({ theme }) => ({
+  margin: "1em",
+  width: "90%",
 }));
+
 export const ManualEntry: React.FC = () => {
-  const classes: any = useStyles();
   const dispatch = useDispatch<AppDispatch>();
   let [amount, setAmount] = useState("0.00");
   let [description, setDescription] = useState("");
@@ -25,16 +28,16 @@ export const ManualEntry: React.FC = () => {
   let [receiptPresent, setReceiptPresent] = useState(false);
 
   const onSubmitTranInfo = () => {
-    dispatch(
-      saveTransaction({
-        amount,
-        description,
-        category,
-        date,
-        receiptPresent,
-        type: TransactionType.manual,
-      })
-    );
+    // dispatch(
+    //   saveTransaction({
+    //     amount,
+    //     description,
+    //     category,
+    //     date,
+    //     receiptPresent,
+    //     type: TransactionType.manual,
+    //   })
+    // );
     setAmount("0.00");
     setDescription("");
     setCategory("");
@@ -43,9 +46,14 @@ export const ManualEntry: React.FC = () => {
   };
 
   return (
-    <Grid container flexDirection="column">
-      <Box component="form" className={classes.formBox} flexDirection="column">
-        <TextField
+    <MainContainer>
+      <FormCard>
+        <Header>
+          <Typography variant="h5" fontWeight="bold">
+            FILL IN EXPENSE DETAILS
+          </Typography>
+        </Header>
+        <InputBox
           id="outlined-controlled"
           label="Amount"
           value={amount}
@@ -53,7 +61,7 @@ export const ManualEntry: React.FC = () => {
             setAmount(event.target.value);
           }}
         />
-        <TextField
+        <InputBox
           id="outlined-controlled"
           label="Category"
           value={category}
@@ -61,7 +69,7 @@ export const ManualEntry: React.FC = () => {
             setCategory(event.target.value);
           }}
         />
-        <TextField
+        <InputBox
           id="outlined-controlled"
           label="Description"
           value={description}
@@ -69,7 +77,7 @@ export const ManualEntry: React.FC = () => {
             setDescription(event.target.value);
           }}
         />
-        <TextField
+        <InputBox
           id="outlined-controlled"
           label="Date"
           value={date}
@@ -77,12 +85,16 @@ export const ManualEntry: React.FC = () => {
             setDate(event.target.value);
           }}
         />
-      </Box>
-      <Grid>
-        <Button variant="contained" onClick={() => onSubmitTranInfo()}>
-          Submit transaction
-        </Button>
-      </Grid>
-    </Grid>
+        <Box alignSelf="flex-end">
+          <Button
+            variant="contained"
+            style={{ backgroundColor: "green" }}
+            onClick={() => onSubmitTranInfo()}
+          >
+            Submit transaction
+          </Button>
+        </Box>
+      </FormCard>
+    </MainContainer>
   );
 };

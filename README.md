@@ -16,7 +16,7 @@ This is a full-stack app for uploading receipt images, processing them via OCR a
 ├── load-app-client/          # React frontend app (deployed to S3)
 ├── receiptProcessor/         # Lambda function to parse receipts and write to Firestore
 └── generate-url-service/     # Lambda for issuing presigned S3 URLs
-
+```
 ##Tech Stack
 Frontend: React + Redux Toolkit + MUI + Styled Components
 

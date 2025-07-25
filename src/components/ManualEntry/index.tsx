@@ -13,6 +13,10 @@ import type { AppDispatch } from "../../features/redux/store";
 // import { saveTransaction } from "../../features/redux/tranReducer";
 import { TransactionType } from "../../features/redux/types";
 import { FormCard, MainContainer, Header } from "../../theme/containers";
+import {
+  saveManualTransaction,
+  setManualTranToState,
+} from "../../features/redux/tranReducer";
 
 const InputBox = styled(TextField)(({ theme }) => ({
   margin: "1em",
@@ -21,24 +25,24 @@ const InputBox = styled(TextField)(({ theme }) => ({
 
 export const ManualEntry: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
-  let [amount, setAmount] = useState("0.00");
+  let [total, setTotal] = useState("0.00");
   let [description, setDescription] = useState("");
   let [category, setCategory] = useState("");
   let [date, setDate] = useState("");
   let [receiptPresent, setReceiptPresent] = useState(false);
 
   const onSubmitTranInfo = () => {
-    // dispatch(
-    //   saveTransaction({
-    //     amount,
-    //     description,
-    //     category,
-    //     date,
-    //     receiptPresent,
-    //     type: TransactionType.manual,
-    //   })
-    // );
-    setAmount("0.00");
+    dispatch(
+      saveManualTransaction({
+        total: Number(total),
+        description,
+        category,
+        date,
+        receiptPresent,
+        type: TransactionType.manual,
+      })
+    );
+    setTotal("0.00");
     setDescription("");
     setCategory("");
     setDate("");
@@ -56,9 +60,9 @@ export const ManualEntry: React.FC = () => {
         <InputBox
           id="outlined-controlled"
           label="Amount"
-          value={amount}
+          value={total}
           onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-            setAmount(event.target.value);
+            setTotal(event.target.value);
           }}
         />
         <InputBox

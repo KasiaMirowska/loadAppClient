@@ -180,6 +180,7 @@ export const transactionInfo = createSlice({
       state.uploadedFileNames = [];
       state.status = TransactionSavingStatus.IDLE;
       state.error = undefined;
+      state.receiptParsed = false;
     },
   },
 
@@ -210,52 +211,34 @@ export const {
 } = transactionInfo.actions;
 export default transactionInfo.reducer;
 
-// export const saveTransaction = (
-//   transaction: ReceiptTransaction | ManualTransaction
-// ): AppThunk => {
-//   return async (dispatch, getState) => {
-//     if (!isReceiptTransactionPayload(transaction)) {
-//       const { amount, description, category, date, receiptPresent, type } =
-//         transaction;
-//       await dispatch(
-//         manualTranToState({
-//           amount,
-//           description,
-//           category,
-//           date,
-//           receiptPresent,
-//           type,
-//         })
-//       );
-//       const updatedState = getState().transaction;
+export const saveManualTransaction = (
+  transaction: ManualTransaction
+): AppThunk => {
+  return async (dispatch, getState) => {
+    const { total, description, category, date, receiptPresent, type } =
+      transaction;
+    await dispatch(
+      setManualTranToState({
+        total,
+        description,
+        category,
+        date,
+        receiptPresent,
+        type,
+      })
+    );
+    const updatedState = getState().transaction;
 
-//       await dispatch(
-//         saveTranIntoDB({
-//           id: updatedState.id,
-//           amount: updatedState.amount,
-//           description: updatedState.description,
-//           category: updatedState.category,
-//           date: updatedState.date,
-//           receiptPresent: updatedState.receiptPresent,
-//           type: TransactionType.manual,
-//         })
-//       );
-//     } else {
-//       await dispatch(receiptTranToState(transaction)); //we should save in db AFTER processing data from the receipt in the lambda...
-//       // temporary solution adding unnesesary property  of the file name to transaction and not including all the data that will available after decoding the doc
-//       const updatedState = getState().transaction;
-//       if (!updatedState.uploadedFileName) {
-//         return;
-//       }
-
-//       await dispatch(
-//         saveTranIntoDB({
-//           id: updatedState.id,
-//           type: TransactionType.receipt,
-//           receiptPresent: updatedState.receiptPresent,
-//           uploadedFileName: updatedState.uploadedFileName,
-//         })
-//       );
-//     }
-//   };
-// };
+    await dispatch(
+      saveTranIntoDB({
+        id: updatedState.id,
+        total: updatedState.total,
+        description: updatedState.description,
+        category: updatedState.category,
+        date: updatedState.date,
+        receiptPresent: updatedState.receiptPresent,
+        type: TransactionType.manual,
+      })
+    );
+  };
+};

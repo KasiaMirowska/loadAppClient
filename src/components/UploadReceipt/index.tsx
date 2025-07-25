@@ -54,8 +54,9 @@ export default function UploadReceipt() {
   useCheckReceiptStatus(receiptId);
   const filesUploaded = useSelector(selectReceiptUpload);
   const isParsed = useSelector(selectReceiptParsed);
-  const { total, merchant, description, category, date, items, tax } =
-    useSelector(selectReceiptDataFromDB);
+  const { total, merchant, category, date, items, tax } = useSelector(
+    selectReceiptDataFromDB
+  );
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFiles = Array.from(event.target.files || []);
     if (!selectedFiles.length) return;
@@ -130,15 +131,15 @@ export default function UploadReceipt() {
                   padding: theme.spacing(2),
                 }}
               >
-                <Typography>{`${merchant}`}</Typography>
-                <Typography>{`Category: ${category}`}</Typography>
-                <Typography>{`Total: $${total}`}</Typography>
-                <Typography>{`Tax: $${tax}`}</Typography>
+                <Typography>{`${merchant.toUpperCase()}`}</Typography>
+                <Typography>{`Category: ${category},`}</Typography>
+                <Typography>{`Total: $${total},`}</Typography>
+                <Typography>{`Tax: $${tax},`}</Typography>
                 {items.map((item) => {
                   return (
                     <Typography
                       key={item.name}
-                    >{`${item.quantity} x ${item.name}.   $${item.price}`}</Typography>
+                    >{`${item.quantity} x ${item.name}.   $${item.price},`}</Typography>
                   );
                 })}
               </Box>

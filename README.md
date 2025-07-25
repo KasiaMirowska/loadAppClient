@@ -47,4 +47,27 @@ npm run build
 ```bash
 aws s3 sync ./build s3://<your-s3-bucket-name> --delete
 ```
+---
+ Workflow Summary: 
 
+• User uploads receipt via client (drag & drop box).
+
+• Client dispatches uploadReceiptImages():
+
+• Calls generate-url-service for presigned S3 URL.
+
+• Uploads the image + a manifest.json with metadata.
+
+• S3 triggers receiptProcessor Lambda:
+
+• Reads receipt image and manifest.json
+
+• Parses it using Textract + Claude 3
+
+• Writes the structured transaction to Firestore
+
+• Client displays receipt preview and parsed data (with loading state)
+
+---
+👩‍💻 Author
+Built by Kasia Mirowska – blending creative design sensibility with modern serverless architecture 💡
